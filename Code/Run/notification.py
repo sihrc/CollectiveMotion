@@ -5,11 +5,14 @@ import smtplib
 import os, sys
 import numpy as np
 
-messages = ["Successfully Received the Command", "Beginning the Parameter Sweep", "Pushing the Results","Awaiting New Command","No Tracks Found","Something failed in the run"]
+messages = ["Successfully Received the Command", "Beginning the Parameter Sweep", "Pushing the Results","Awaiting New Command","No Tracks Found"]
 
 fromaddr = 'c.sihrc.lee@gmail.com'  
 toaddrs  = 'sihrc.c.lee@gmail.com'  
-msg = sys.argv[1] + "   " + messages[int(sys.argv[2])]
+if sys.argv[2] == 'm':
+	msg = sys.argv[1] + "   " + sys.argv[3]
+else:	
+	msg = sys.argv[1] + "   " + messages[int(sys.argv[2])]
 
 # Credentials (if needed)  
 username = 'c.sihrc.lee'  

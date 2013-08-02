@@ -20,7 +20,6 @@ class _RenderTask(scaffold.Task):
     def _render(self, images, mapping=lambda image: image, num = ""):
         if self._outputParam is None: raise NotImplemented
         output = _formatOutput(self, self._outputParam)
-
         seq = im.ImageSeq(map(mapping, images))
         path = output[:-4] + "_" + num + output[-4:]
         seq.writeMovie(path)    
@@ -283,6 +282,25 @@ class _AnimationTask(_RenderTask):
             self._render(images,num = str(count))
         if count > 1:
             self._joinParts(count)
+
+PLOT_PIV_FIELD_OUTPUT = scaffold.registerParameter("plotPIVFieldOutput","../plots/{0}-PIVField.avi")
+"""The file path to render the toutput animation of PlotPIVField to."""
+
+class PlotPIVField(_RenderTask):
+    dependencies = [im.ComputeForegroundMasks]
+     _outputParam = PLOT_PIV_FIELD_OUTPUT
+
+     def run(self):
+        import pivtools.PIV as PIV
+        frames = self._import(im.ComputeForegroundMasks, "masks")
+        images = []
+        for i in range(len(frames)-1):
+            fig = PIV.runPIV(frames[i],frames[i+1])
+            fig.canvas.draw()
+            image = np.fromstring(fig.canvas.tostring_rgb(),dtype=np.uint8)
+            images.append(image)
+        self._render(images)
+
 
 class _PlotField(_AnimationTask):
 

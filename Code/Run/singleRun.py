@@ -199,6 +199,7 @@ def setParams():
                "renderEllipsesOutput.avi",
                "renderTracksOutput.avi",
                "plotParticleDistanceOutput.png",
+               "plotPIVFieldOutput.avi",
                "plotDensityFieldOutput.avi",
                "plotVelocityFieldOutput.avi"]
 
@@ -232,8 +233,8 @@ def runSeq(context):
     #s.addTask(images.Watershed)
 
     #s.addTask(visual.RenderSeedImages)
-    s.addTask(visual.RenderEllipses)
-    s.addTask(visual.RenderTracks)
+    #s.addTask(visual.RenderEllipses)
+    #s.addTask(visual.RenderTracks)
     #s.addTask(visual.RenderDifferences)
     #s.addTask(visual.RenderForegroundMasks)
     #s.addTask(visual.RenderRemovedBackground)
@@ -248,8 +249,9 @@ def runSeq(context):
     #s.addTask(analysis.CorrelateDirectorVelocities)
     #s.addTask(analysis.CorrelateDirectors)
     #s.addTask(analysis.CorrelateVelocities)
-
-    s.addTask(visual.PlotVelocityField)
+    
+    s.addTask(visual.plotPIVField)
+    #s.addTask(visual.PlotVelocityField)
     #s.addTask(visual.PlotDensityField)
 
     #s.addTask(printConfig)
