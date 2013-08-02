@@ -1,0 +1,1 @@
+video1=DirectShowSource("..\..\TrackingVideos\OneQuarter\141\OneQuarter141.avi")video2=DirectShowSource("..\Analysis\Sweep 1\OneQuarter\141\renderTracksOutput\2.5_6.0_.avi")StackHorizontal(video1,video2).AssumeFPS(.1)
