@@ -65,7 +65,7 @@ def display_vector_field( filename,**kw):
     valid = ~invalid
     pl.quiver(a[invalid,0],a[invalid,1],a[invalid,2],a[invalid,3],color='r',**kw)
     pl.quiver(a[valid,0],a[valid,1],a[valid,2],a[valid,3],color='b',**kw)
-    return pl
+    return pl.gcf()
 
 def imread( filename, flatten=True ):
     """Read an image file into a numpy array

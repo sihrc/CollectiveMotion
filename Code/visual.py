@@ -1,8 +1,9 @@
 from subprocess import call
-import scaffold
+import scaffold, sys
 import particles as pt
 import images as im
 import analysis as an
+from pivtools import PIV
 import numpy as np
 import gc, csv, math, cv2, os, colorsys
 from matplotlib import pyplot as plt
@@ -22,9 +23,9 @@ class _RenderTask(scaffold.Task):
         output = _formatOutput(self, self._outputParam)
         seq = im.ImageSeq(map(mapping, images))
         path = output[:-4] + "_" + num + output[-4:]
-        seq.writeMovie(path)    
+        seq.writeMovie(path)
         self.context.log("Rendered to {0}.", path)
-    
+
     def _joinParts(self,count):
         output = _formatOutput(self, self._outputParam)
         index = output.find("Sweep")
@@ -40,6 +41,58 @@ class _RenderTask(scaffold.Task):
             path = output[:-4] + "_" + str(i+1) + output[-4:]
             os.remove(path)
                 
+PLOT_PIV_FIELD_OUTPUT = scaffold.registerParameter("plotPIVFieldOutput","../plots/{0}-PIVField.avi")
+"""The file path to render the toutput animation of PlotPIVField to."""
+
+class PlotPIVField(_RenderTask):
+    name = "Plot PIV Field"
+    dependencies = [im.ComputeForegroundMasks]
+    _outputParam = PLOT_PIV_FIELD_OUTPUT
+
+    class NullDevice():
+        def write(self, s):
+            pass
+    def shutup(self):
+        self.orig = sys.stdout
+        sys.stdout = self.NullDevice()
+
+    def talk(self):
+        sys.stdout = self.orig
+
+    def run(self):
+        from pivtools import PIV
+        self.output = _formatOutput(self, self._outputParam)
+        frames = self._import(im.ComputeForegroundMasks, "masks")
+        images = []
+        for i in range(len(frames)-1):
+            self.shutup()
+            fig = PIV.runPIV(frames[i].astype(np.int32),frames[i+1].astype(np.int32),dt = self.context.attrs.dt)
+            agg = fig.canvas.switch_backends(FigureCanvasAgg)
+            agg.draw()
+            #image = np.fromstring(agg.tostring_rgb(),dtype = np.uint8)
+            #image.shape = agg.get_width_height() + (3,)
+            self.shape_ = agg.get_width_height()
+            self.talk()
+            #images.append(image)
+            fig.savefig('images\\' + 'image'+ ('{0:0'+str(len(str(20)))+'}').format(i)+'.png')
+            print "\nProgress:",i/float(len(frames)-1)*100,"%\n"
+            self.lenstr = str(len(str(i)))
+        #self._render(images) <--- Couldn't figure out why this doesn't work. Video renders but its empty.
+        self._simpleRender(".\\images")
+
+    def _simpleRender(self,path):
+        from subprocess import call
+        import shutil
+        cmd = "ffmpeg -f image2 -r 5 -i .\\images\\image%0" + self.lenstr + "d.png -c:v libx264 -r 20 .\\images\\output.mp4"
+        #cmd = "ffmpeg -f image2 -r 1 -i .\\images\\image%0"+self.lenstr+"d.png -vcodec mpeg4 -y .\\images\\output.mp4"
+        os.system(cmd)
+        shutil.copy(".\\images\\output.mp4",self.output)
+        [os.remove(os.path.join('.\\images',filename)) for filename in os.listdir(".\\images")]
+        #cv2.destroyAllWindows()
+        #video.release()
+
+
+
 
 
 RENDER_MASKS_OUTPUT = scaffold.registerParameter("renderMasksOutput", "../videos/{0}-masks.avi")
@@ -53,7 +106,7 @@ class RenderForegroundMasks(_RenderTask):
 
     def run(self):
         images = self._import(im.ComputeForegroundMasks, "masks")
-        self._render(images, im.binaryToGray)
+        self._render(images, im.binaryToGray)   
 
 RENDER_DIFFS_OUTPUT = scaffold.registerParameter("renderDiffsOutput", "../videos/{0}-diffs.avi")
 """The file path to render the output video of RenderDifferences to."""
@@ -282,25 +335,6 @@ class _AnimationTask(_RenderTask):
             self._render(images,num = str(count))
         if count > 1:
             self._joinParts(count)
-
-PLOT_PIV_FIELD_OUTPUT = scaffold.registerParameter("plotPIVFieldOutput","../plots/{0}-PIVField.avi")
-"""The file path to render the toutput animation of PlotPIVField to."""
-
-class PlotPIVField(_RenderTask):
-    dependencies = [im.ComputeForegroundMasks]
-     _outputParam = PLOT_PIV_FIELD_OUTPUT
-
-     def run(self):
-        import pivtools.PIV as PIV
-        frames = self._import(im.ComputeForegroundMasks, "masks")
-        images = []
-        for i in range(len(frames)-1):
-            fig = PIV.runPIV(frames[i],frames[i+1])
-            fig.canvas.draw()
-            image = np.fromstring(fig.canvas.tostring_rgb(),dtype=np.uint8)
-            images.append(image)
-        self._render(images)
-
 
 class _PlotField(_AnimationTask):
 

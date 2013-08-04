@@ -550,8 +550,10 @@ class _ImageSeqBase(object):
                                  fourcc=cv2.cv.CV_FOURCC(*"PIM1"),
                                  frameSize=self[0].shape[0:2], 
                                  isColor=isColor)
-        
+        print self[0]
+
         for image in self:
+            image = image.astype(np.bool)
             if image.dtype == np.bool:
                 image = image.astype(np.uint8)*255
             writer.write(image)

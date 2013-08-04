@@ -11,6 +11,7 @@ sys.path.insert(0,'../')
 import images, particles, visual, scaffold, analysis
 
 
+
 global sweep, valueChange
 sweep = "Sweep " + sys.argv[3]
 
@@ -131,7 +132,7 @@ class DetectionAnalysis(scaffold.Task):
 class Analysis(scaffold.Task):
     """ Grabs Data for Analysis and saves as .txt files"""
     name = "General Analysis"
-    dependencies = [DetectionAnalysis,TrackingAnalysis]
+    dependencies = []#[DetectionAnalysis,TrackingAnalysis]
     
     def isComplete(self):
         return None
@@ -144,8 +145,8 @@ class Analysis(scaffold.Task):
         analysisData = []
         valueChange = scaffold._registeredParams["valueChange"].defaultValue
         #analysisData += self._import(DetectionAnalysis,"writeValues")
-        analysisData += self._import(TrackingAnalysis,"trackValues")
-        print "analysisData",analysisData
+        #analysisData += self._import(TrackingAnalysis,"trackValues")
+        #print "analysisData",analysisData
         #Writer
         filename = "..\\Analysis\\Sweep "+sys.argv[3]+"\\"+str(sys.argv[1])+"\\"+sys.argv[2]+"/Analysis.csv"
         f = csv.writer(open(filename,'a'))
@@ -177,7 +178,7 @@ def setParams():
         valueChange = np.array(inputs[1]).astype(float)
         valueChange = list(np.around(valueChange,5))
         params = dict(zip(keyChange,valueChange))
-        for key in ["trackMemory", "maskLowThresh", "dilationRadius","trackcutoff"]:
+        for key in ["maskLowThresh", "dilationRadius"]:#,"trackcutoff","trackMemory"]:
             params[key] = int(params[key])
 
     scaffold.registerParameter("valueChange", valueChange) 
@@ -199,7 +200,7 @@ def setParams():
                "renderEllipsesOutput.avi",
                "renderTracksOutput.avi",
                "plotParticleDistanceOutput.png",
-               "plotPIVFieldOutput.avi",
+               "plotPIVFieldOutput.mp4",
                "plotDensityFieldOutput.avi",
                "plotVelocityFieldOutput.avi"]
 
@@ -250,13 +251,13 @@ def runSeq(context):
     #s.addTask(analysis.CorrelateDirectors)
     #s.addTask(analysis.CorrelateVelocities)
     
-    s.addTask(visual.plotPIVField)
+    s.addTask(visual.PlotPIVField)
     #s.addTask(visual.PlotVelocityField)
     #s.addTask(visual.PlotDensityField)
 
     #s.addTask(printConfig)
     #s.addTask(visual.PlotParticleDistance)
-    s.addTask(Analysis)
+    #s.addTask(Analysis)
     s.run(context, forceRedo=False)
 
 

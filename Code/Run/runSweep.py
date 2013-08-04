@@ -62,7 +62,7 @@ def runSequence():
             writer.writerow(paramlist)
             writer.writerow(comb)
         density, velocities = loadData()
-        velocities = velocities[0:3]
+        #velocities = [velocities[0]]
         count = 0
         for velocity in velocities:
             count += 1
@@ -74,7 +74,7 @@ def runSequence():
             except:
                 call(["python","notification.py",sys.argv[1],'5'])
                 time.sleep(5)
-                sys.exit()
+
 
             
             
@@ -88,6 +88,7 @@ def setParams():
     params.append(["morphThreshold",[.2]])
     params.append(["blurSigma",[1.25]])
     params.append(["expThreshold",[.0005]])
+    """
     if sys.argv[1] == 'High':
         params.append(["trackSearchRadius",[1,1.5]])
     if sys.argv[1] == "TwoThirds":
@@ -96,7 +97,9 @@ def setParams():
         params.append(["trackSearchRadius",[2]])
     params.append(["trackMemory",[1,3,5,9,11,13]])
     params.append(["trackcutoff",[5,7,9,12]])
+    """
     return params
+    
 
 if __name__ == "__main__":
     delAnalysisFolder()

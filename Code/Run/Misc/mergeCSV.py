@@ -64,7 +64,7 @@ def Merge(path):
 
 
 if __name__ == "__main__":
-	path = "C:\\Users\\clee2\\Documents\\2013 Summer\\Code\\Analysis\\Sweep " + sys.argv[1]
+	path = "..\\..\\Code\\Analysis\\Sweep " + sys.argv[1]
 
 	dataset = dict()
 	dataset["High"] = ["080","082","084","086","088","090","092","094","096"]
