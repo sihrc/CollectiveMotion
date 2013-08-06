@@ -1,7 +1,7 @@
 --------
  README
 --------
-Last Updated: 8/16/2013
+Last Updated: 8/6/2013
 
 ----------
  CONTENTS
@@ -17,7 +17,7 @@ Last Updated: 8/16/2013
 				Provides most of the results. New tasks can be implemented, 
 				following similar structure under class scaffold.Task
 			>analyzeSweep.py
-				Run to access data. Compiles all analysis.csv files into sweepresults.csv. 
+				Run to access data results. Compiles all analysis.csv files into sweepresults.csv. 
 				From sweepresults.csv, specific sweep results can be accessed by inputting 
 				line number of their locations in sweepresults.csv
 			>automatedRun.py
@@ -81,12 +81,13 @@ PARAMETER SWEEPING:
 	expThreshold 	   .0005	
 	featureRadius	 Not Swept - If detection needs to be improved, featureRadius may need to be swept.
 
- - TRACKING: INCOMPLETE
-	trackMemory		
+ - TRACKING: 
+ 	via trackpy :: INCOMPLETE
+	   trackMemory		
 		Determines how long a track is remembered (in frames) once it disappears 
 		from frame (it can come back later).If obvious tracks are interrupted due to 
 		dropping out of the frame, increase this parameter. 
-	trackSearchRadius
+	   trackSearchRadius
 		Determines how far a particle can go to be included in the same track. 
 		Basically, this controls how fast the particles are allowed to travel.
 
@@ -96,6 +97,18 @@ PARAMETER SWEEPING:
 		this requires a high amount of computation time and power. Currently,
 		another method OpenPIV (Python Particle Image Velocimetry) module is 
 		being restored for use in this project (located on GitHub under user:sihrc)
+	
+	via PIV Tracking :: COMPLETE
+	   Parameters not yet explored - located in pivtools\PIV.py. 
+	   
+	   -CURRENT PROBLEMS-
+	   	The rendered videos show some indications of accurately tracking particle velocities
+	   	in the form of a vector field. There are some extremeties in the vidoes (large and abrupt
+	   	vectors). These may be solved after calibrating parameters used in PIV.py 
+
+ANALYSIS:
+  - NOT YET BEGUN.
+	   
 
 ------------
  HOW TO USE
