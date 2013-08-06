@@ -46,7 +46,7 @@ PLOT_PIV_FIELD_OUTPUT = scaffold.registerParameter("plotPIVFieldOutput","../plot
 
 class PlotPIVField(_RenderTask):
     name = "Plot PIV Field"
-    dependencies = [im.ComputeForegroundMasks]
+    dependencies = [im.LoadImages]#[im.ComputeForegroundMasks]
     _outputParam = PLOT_PIV_FIELD_OUTPUT
 
     class NullDevice():
@@ -62,34 +62,27 @@ class PlotPIVField(_RenderTask):
     def run(self):
         from pivtools import PIV
         self.output = _formatOutput(self, self._outputParam)
-        frames = self._import(im.ComputeForegroundMasks, "masks")
+        frames = self._import(im.LoadImages, "images")
         images = []
         for i in range(len(frames)-1):
             self.shutup()
             fig = PIV.runPIV(frames[i].astype(np.int32),frames[i+1].astype(np.int32),dt = self.context.attrs.dt)
             agg = fig.canvas.switch_backends(FigureCanvasAgg)
             agg.draw()
-            #image = np.fromstring(agg.tostring_rgb(),dtype = np.uint8)
-            #image.shape = agg.get_width_height() + (3,)
             self.shape_ = agg.get_width_height()
             self.talk()
-            #images.append(image)
-            fig.savefig('images\\' + 'image'+ ('{0:0'+str(len(str(20)))+'}').format(i)+'.png')
+            fig.savefig('images\\' + 'image'+ ('{0:0'+str(len(str(len(frames))))+'}').format(i)+'.png')
             print "\nProgress:",i/float(len(frames)-1)*100,"%\n"
             self.lenstr = str(len(str(i)))
-        #self._render(images) <--- Couldn't figure out why this doesn't work. Video renders but its empty.
         self._simpleRender(".\\images")
 
     def _simpleRender(self,path):
         from subprocess import call
         import shutil
-        cmd = "ffmpeg -f image2 -r 5 -i .\\images\\image%0" + self.lenstr + "d.png -c:v libx264 -r 20 .\\images\\output.mp4"
-        #cmd = "ffmpeg -f image2 -r 1 -i .\\images\\image%0"+self.lenstr+"d.png -vcodec mpeg4 -y .\\images\\output.mp4"
+        cmd = "ffmpeg -f image2 -r 20 -i .\\images\\image%0" + self.lenstr + "d.png -c:v libx264 -r 20 .\\images\\output.mp4"
         os.system(cmd)
         shutil.copy(".\\images\\output.mp4",self.output)
         [os.remove(os.path.join('.\\images',filename)) for filename in os.listdir(".\\images")]
-        #cv2.destroyAllWindows()
-        #video.release()
 
 
 

@@ -62,7 +62,7 @@ def runSequence():
             writer.writerow(paramlist)
             writer.writerow(comb)
         density, velocities = loadData()
-        #velocities = [velocities[0]]
+        velocities = [velocities[0]]
         count = 0
         for velocity in velocities:
             count += 1
