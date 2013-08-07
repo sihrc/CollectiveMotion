@@ -157,4 +157,138 @@ If there are issues not mentioned here, contact:
 [1]christopher.lee@students.olin.edu/sihrc.c.lee@gmail.com
 [2]chase.kernan@gmail.com
 
+------------
+ABOUT OpenPIV
+------------
+The main algorithm this code uses is openpiv.process.WiDIM: WiDIM
 
+    Implementation of the WiDIM algorithm (Window Displacement Iterative Method).
+    This is an iterative  method to cope with  the lost of pairs due to particles 
+    motion and get rid of the limitation in velocity range due to the window size.
+    The possibility of window size coarsening is implemented.
+    Example : minimum window size of 16*16 pixels and coarse_level of 2 gives a 1st
+    iteration with a window size of 64*64 pixels, then 32*32 then 16*16.
+        ----Algorithm : At each step, a predictor of the displacement (dp) is applied based on the results of the previous iteration.
+                        Each window is correlated with a shifted window.
+                        The displacement obtained from this correlation is the residual displacement (dc)
+                        The new displacement (d) is obtained with dx = dpx + dcx and dy = dpy + dcy
+                        The velocity field is validated and wrong vectors are replaced by mean value of surrounding vectors from the previous iteration (or by bilinear interpolation if the window size of previous iteration was different)
+                        The new predictor is obtained by bilinear interpolation of the displacements of the previous iteration:
+                            dpx_k+1 = dx_k
+
+    Reference:
+        F. Scarano & M. L. Riethmuller, Iterative multigrid approach in PIV image processing with discrete window offset, Experiments in Fluids 26 (1999) 513-523
+    
+    Parameters
+    ----------
+    frame_a : 2d np.ndarray, dtype=np.int32
+        an two dimensions array of integers containing grey levels of 
+        the first frame.
+        
+    frame_b : 2d np.ndarray, dtype=np.int32
+        an two dimensions array of integers containing grey levels of 
+        the second frame.
+        
+    mark : 2d np.ndarray, dtype=np.int32
+        an two dimensions array of integers with values 0 for the background, 1 for the flow-field. If the center of a window is on a 0 value the velocity is set to 0.
+
+    min_window_size : int
+        the size of the minimum (final) (square) interrogation window.
+        
+    overlap_ratio : float
+        the ratio of overlap between two windows (between 0 and 1).
+        
+    dt : float
+        the time delay separating the two frames.
+    
+    validation_method : string
+        the method used for validation (in addition to the sig2noise method). Only the mean velocity method is implemented now
+    
+    trust_1st_iter : int = 0 or 1
+        0 if the first iteration need to be validated. With a first window size following the 1/4 rule, the 1st iteration can be trusted and the value should be 1 (Default value)
+     
+    validation_iter : int
+        number of iterations per validation cycle.
+       
+    tolerance : float
+        the threshold for the validation method chosen. This does not concern the sig2noise for which the threshold is 1.5; [nb: this could change in the future]
+    
+    nb_iter_max : int
+        global number of iterations.
+       
+    subpixel_method : string
+         one of the following methods to estimate subpixel location of the peak: 
+         'centroid' [replaces default if correlation map is negative], 
+         'gaussian' [default if correlation map is positive], 
+         'parabolic'.
+    
+    sig2noise_method : string 
+        defines the method of signal-to-noise-ratio measure,
+        ('peak2peak' or 'peak2mean'. If None, no measure is performed.)
+        
+    width : int
+        the half size of the region around the first
+        correlation peak to ignore for finding the second
+        peak. [default: 2]. Only used if ``sig2noise_method==peak2peak``.
+        
+    nfftx   : int
+        the size of the 2D FFT in x-direction, 
+        [default: 2 x windows_a.shape[0] is recommended]
+        
+    nffty   : int
+        the size of the 2D FFT in y-direction, 
+        [default: 2 x windows_a.shape[1] is recommended]
+
+    
+    Returns
+    -------
+
+    x : 2d np.ndarray
+        a two dimensional array containing the x-axis component of the interpolations locations.
+        
+    y : 2d np.ndarray
+        a two dimensional array containing the y-axis component of the interpolations locations.
+        
+    u : 2d np.ndarray
+        a two dimensional array containing the u velocity component,
+        in pixels/seconds.
+        
+    v : 2d np.ndarray
+        a two dimensional array containing the v velocity component,
+        in pixels/seconds.
+        
+    mask : 2d np.ndarray
+        a two dimensional array containing the boolean values (True for vectors interpolated from previous iteration)
+        
+    Example
+    --------
+    
+    >>> x,y,u,v, mask = openpiv.process.WiDIM( frame_a, frame_b, mark, min_window_size=16, overlap_ratio=0.25, coarse_factor=2, dt=0.02, validation_method='mean_velocity', trust_1st_iter=1, validation_iter=2, tolerance=0.7, nb_iter_max=4, sig2noise_method='peak2peak')
+
+    --------------------------------------
+    Method of implementation : to improve the speed of the programm,
+    all data have been placed in the same huge 4-dimensions 'F' array.
+    (this prevent the definition of a new array for each iteration)
+    However, during the coarsening process a large part of the array is not used.
+    Structure of array F:
+    --The 1st index is the main iteration (K)   --> length is nb_iter_max
+        -- 2nd index (I) is row (of the map of the interpolations locations of iteration K) --> length (effectively used) is Nrow[K]
+            --3rd index (J) is column  --> length (effectively used) is Ncol[K]
+                --4th index represent the type of data stored at this point:
+                            | 0 --> x         |
+                            | 1 --> y         | 
+                            | 2 --> xb        |
+                            | 3 --> yb        | 
+                            | 4 --> dx        |
+                            | 5 --> dy        | 
+                            | 6 --> dpx       |
+                            | 7 --> dpy       | 
+                            | 8 --> dcx       |
+                            | 9 --> dcy       | 
+                            | 10 --> u        |
+                            | 11 --> v        | 
+                            | 12 --> si2noise | 
+    Storage of data with indices is not good for comprehension so its very important to comment on each single operation.
+    A python dictionary type could have been used (and would be much more intuitive)
+    but its equivalent in c language (type map) is very slow compared to a numpy ndarray.
+   
