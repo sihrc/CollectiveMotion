@@ -73,12 +73,12 @@ Last Updated: 8/6/2013
 
 PARAMETER SWEEPING:
  - DETECTION: COMPLETE
-	maskLowThresh 	-10.0
-	maskHighThresh 	  3.0
+	maskLowThresh 	 -10
+	maskHighThresh 	  3
 	dilationRadius 	  3.0
-	morphThreshold 	   .2
+	morphThreshold 	  .2
 	blurSigma 	  1.25
-	expThreshold 	   .0005	
+	expThreshold 	  .0005	
 	featureRadius	 Not Swept - If detection needs to be improved, featureRadius may need to be swept.
 
  - TRACKING: 
@@ -99,12 +99,12 @@ PARAMETER SWEEPING:
 		being restored for use in this project (located on GitHub under user:sihrc)
 	
 	via PIV Tracking :: COMPLETE
-	   Parameters not yet explored - located in pivtools\PIV.py. 
-	   
-	   -CURRENT PROBLEMS-
-	   	The rendered videos show some indications of accurately tracking particle velocities
-	   	in the form of a vector field. There are some extremeties in the vidoes (large and abrupt
-	   	vectors). These may be solved after calibrating parameters used in PIV.py 
+		sig2noise_method	'peak2peak'
+		subpixel_method		'gaussian'
+		tolerance		0.0
+		validation_iter		1
+		overlap_ratio		0.5
+		coarse_factor   	2
 
 ANALYSIS:
   - NOT YET BEGUN.
