@@ -3,6 +3,35 @@
 --------
 Last Updated: 8/6/2013
 
+--------
+Summary
+--------
+The package executes particle detection and tracking along with several analysis algorithms
+to better interpret the results. Contained in this package are a set of python script files
+that contain the actual algorithms and a set of script files that run these algorithms. 
+These are listed in "Contents". 
+
+Getting started - 
+	The first step of using this package is to fully understand the structure
+	of the code. There are several classes implemented in this package. There are "scaffolding" 
+	classes inside scaffold.py that hold the general structure for all the "tasks" (image proc-
+	essing/detection/tracking/analysis/etc). Knowing this, there shouldn't be much to edit under
+	scaffold.py; it would be best to just leave this file alone. 
+	
+	The actual algorithms are held in particles.p with particle detection followed by particle
+	tracking. You will notice now that base "tasks" inherit scaffold.task ( which is the structure
+	for tasks that the scaffold will recognize and run. If you wish to create a new task, it is best
+	to follow the guidelines for scaffold.task - include dependencies = [], run(), export(), isComplete()).
+	You will also notice that classes inherit each others, and not just scaffold.Task. Generally,
+	if a class inherits another class, running those classes will automatically run the classes that
+	are inherited/included in dependencies. As a result, there are several "final result" tasks that
+	are also listed in singleRun.py. These tasks are the ones that are run; the scaffold will take care
+	of any dependencies they require.
+	
+	With general knowledge of python classes, it shouldn't be too hard to be able to add/modify the
+	existing code. There are methods of saving variables globally, accessing functions globally, and
+	sharing results globally. These are all listed under scaffold.py. 
+
 ----------
  CONTENTS
 ----------
@@ -12,10 +41,6 @@ Last Updated: 8/6/2013
 		Contains data with structure ./Data/Density/Series###_##_##.xml with .tifs
         > ./Code
 		>./Code/Run
-			>analysis.py
-				Contains the analysis tasks to be run in the context.
-				Provides most of the results. New tasks can be implemented, 
-				following similar structure under class scaffold.Task
 			>analyzeSweep.py
 				Run to access data results. Compiles all analysis.csv files into sweepresults.csv. 
 				From sweepresults.csv, specific sweep results can be accessed by inputting 
@@ -54,7 +79,15 @@ Last Updated: 8/6/2013
 				Saves all videos and names them after density and velocity of the data
 				in specified directory. (Does not render them).
 		>./Code/Run/trackpy
-			Contains tracking algorithm currently implemented.
+			Contains tracking algorithm currently implemented. This is currently not working
+			optimally. The alternative, OpenPIV, is used.
+		>./Code/pivtools
+			Contains the OpenPIV implementation. The open-piv package must be installed. These
+			are only the files that were edited from the original to work with our code.
+		>analysis.py
+			Contains the analysis tasks to be run in the context.
+			Provides most of the results. New tasks can be implemented, 
+			following similar structure under class scaffold.Task
 		>images.py
 			Contains all scaffold.Tasks that deal with the data images.
 		>particles.py
@@ -107,7 +140,16 @@ PARAMETER SWEEPING:
 		coarse_factor   	2
 
 ANALYSIS:
-  - NOT YET BEGUN.
+ - VELOCITY CORRELATION
+ 	The velocity correlation algorithm is working and can be accessed in singleRun.py. To scale results,
+ 	change the RADII parameter set in analysis.py. These must be scaled accordingly with the scaling_factor
+ 	for PIV. Some issues that this will solve are sudden drops in correlation due to bad resolution of PIV.
+ - DENSITY FIELD 
+ 	This now works without using PIV. This is located under density_analysis. The problem with this before
+ 	was that it was included under GriddedField which depends on PIVTracking, but PIV does not do particle
+ 	detection; therefore, particle density is unknown. Density field is now routed through density_analysis.py
+ 	which uses FindParticlesViaMorph (the original particel detection algorithm). This code works.
+
 	   
 
 ------------
@@ -152,14 +194,19 @@ COMMON ISSUES:
 		writer is missing/wrong. A quick online search for a codec parameter that is compatible
 		with your system will resolve that issue. (Switching back and forth sometimes solves the
 		issue.)
+	Using GriddedFields
+		When trying to use GriddedFields, a common issue is an index error in cellMap. This happens
+		because the units of the table that is imported is not in microns. To fix this, multiply data
+		in pixels by self.context.attrs.pixel (the conversion factor between pixels and microns as set
+		by the config file provided by the raw images - .xml file). 
 
 If there are issues not mentioned here, contact:
 [1]christopher.lee@students.olin.edu/sihrc.c.lee@gmail.com
 [2]chase.kernan@gmail.com
 
-------------
+--------------
 ABOUT OpenPIV
-------------
+--------------
 The main algorithm this code uses is openpiv.process.WiDIM: WiDIM
 
     Implementation of the WiDIM algorithm (Window Displacement Iterative Method).
