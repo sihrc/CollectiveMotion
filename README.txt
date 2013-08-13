@@ -6,10 +6,11 @@ Last Updated: 8/13/2013
 --------
 Summary
 --------
-This package performs particle detection and tracking on provided images from the confocal.
-It also contains some analysis code to interpret results. Contained in this package are a 
-set of python script files that contain the actual algorithms and a set of script files 
-that run these algorithms. This structure is listed under "Contents" of this document. 
+This package performs particle detection and tracking on provided images from the
+confocal. It also contains some analysis code to interpret results. Contained in 
+this package are a set of python script files that contain the actual algorithms 
+and a set of script files that run these algorithms. This structure is listed under
+"Contents" of this document. 
 
 Getting started - 
 	The first step of using this package is to fully understand the structure
