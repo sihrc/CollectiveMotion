@@ -1,10 +1,11 @@
-#!/usr/bin/env 
 """
 Contains tasks and classes for loading/manipulating an image sequence.
 
 :Author: Chase Kernan
 :Contact: chase.kernan@gmail.com
 :Created: August 12, 2012
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 
 import scaffold
@@ -136,6 +137,7 @@ class ParseConfig(scaffold.Task):
         a.dt         = a.duration/a.length
         a.imageSize  = a.shape*a.pixel
         a.channel    = 0 # TODO: handle multiple channels?
+        a.iters      = 1
 
         # image paths
         def imagePath(imageNum):
@@ -144,7 +146,7 @@ class ParseConfig(scaffold.Task):
             return os.path.join(a.folder, relative)
         
         numDigits = len(str(a.length - 1))
-        imageNums = (str(i).zfill(numDigits) for i in range(a.length))
+        imageNums = (str(i).zfill(numDigits) for i in range(a.iters))
         self.context.createArray("imagePaths", [imagePath(num) for num in imageNums])
         self.context.flush()
 
@@ -550,7 +552,6 @@ class _ImageSeqBase(object):
                                  fourcc=cv2.cv.CV_FOURCC(*"PIM1"),
                                  frameSize=self[0].shape[0:2], 
                                  isColor=isColor)
-        print self[0]
 
         for image in self:
             image = image.astype(np.bool)

@@ -3,6 +3,8 @@ Synchronization: Synchronizes files between a two directories. In this applicati
 it is syncing files between a network drive (student drive) and the local drive. This 
 script is capable of handling "push" and "pull" with option [1,2] for with replacment 
 or without replacement.
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 
 import os, win32api, sys, shutil, filecmp, time, hashlib
@@ -24,8 +26,6 @@ def synchro(root_src_dir,root_dst_dir):
 	#Walking through the directory
 	for src_dir, dirs, files in os.walk(root_src_dir):
 		dst_dir = src_dir.replace(root_src_dir, root_dst_dir)
-		if not os.path.exists(dst_dir):
-			os.mkdir(dst_dir)
 		for file_ in files:
 			src_file = os.path.join(src_dir, file_)
 			dst_file = os.path.join(dst_dir, file_)
@@ -34,6 +34,8 @@ def synchro(root_src_dir,root_dst_dir):
 			if  ext in arglist:
 				if ext == '.avi' and os.path.exists(dst_file):
 					continue
+				if not os.path.exists(dst_dir):
+					os.makedirs(dst_dir)
 				print "Replacing", dst_file
 				shutil.copy(src_file,dst_file)
 

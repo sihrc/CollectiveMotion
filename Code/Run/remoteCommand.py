@@ -2,6 +2,8 @@
 Runs on alternate computers with argument [1,2,3,4,5] for respective decreasing densities ([High, TwoThirds, ...]).
 Listens for command issued to specified email address. Turns on and off with ready.txt located on the server. Without
 the on and off feature, gmail (any server) will deny access with too many repeated log ins.
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 import poplib, sys, time
 from subprocess import call
@@ -9,8 +11,8 @@ from email import parser
 
 def checkEmail():
 	pop_conn = poplib.POP3_SSL('pop.gmail.com')
-	pop_conn.user('recent:c.sihrc.lee@gmail.com')
-	pop_conn.pass_('Cl120193')
+	pop_conn.user('')
+	pop_conn.pass_('')
 	#Get messages from server:
 	messages = [pop_conn.retr(i) for i in range(1, len(pop_conn.list()[1]) + 1)]
 	# Concat message pieces:

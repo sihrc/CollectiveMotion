@@ -1,5 +1,7 @@
 """
 This script calls singleRun.py which runs the application. This script handles the changing parameters and is called by automateRun.py
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 
 from subprocess import call
@@ -62,8 +64,8 @@ def runSequence():
             writer.writerow(paramlist)
             writer.writerow(comb)
         density, velocities = loadData()
-        velocities = [velocities[0]]
         count = 0
+        velocities = [velocities[0]]
         for velocity in velocities:
             count += 1
             print "------------------------------------------------------------"
@@ -75,28 +77,35 @@ def runSequence():
                 call(["python","notification.py",sys.argv[1],'5'])
                 time.sleep(5)
 
-
-            
-            
-            
-
 def setParams():
     params = list()
+    #""" No Sweep
+    params.append(["default_",['default']])
+    #"""
+    
+    """ Detection
     params.append(["maskLowThresh",[-10.0]])
     params.append(["maskHighThresh",[3.0]])
     params.append(["dilationRadius",[3.0]])
     params.append(["morphThreshold",[.2]])
     params.append(["blurSigma",[1.25]])
     params.append(["expThreshold",[.0005]])
-    """
-    if sys.argv[1] == 'High':
-        params.append(["trackSearchRadius",[1,1.5]])
-    if sys.argv[1] == "TwoThirds":
-        params.append(["trackSearchRadius",[1.5,2]])
-    else:
-        params.append(["trackSearchRadius",[2]])
-    params.append(["trackMemory",[1,3,5,9,11,13]])
-    params.append(["trackcutoff",[5,7,9,12]])
+    params.append(["featureRadius",[5]])
+    #"""
+
+    """ PIV Params
+    params.append(["sig2noise_method",['peak2peak']])
+    params.append(["subpixel_method",['gaussian',]])
+    params.append(["tolerance",[0.0]])
+    params.append(["validation_iter",[1]])
+    params.append(["overlap_ratio",[0.5]])
+    params.append(["coarse_factor",[2]])
+
+    #"""
+    """ Tracking
+    params.append(["trackSearchRadius",[1.5]])
+    params.append(["trackMemory",[11]])
+    params.append(["trackcutoff",[3]])
     """
     return params
     
@@ -104,6 +113,7 @@ def setParams():
 if __name__ == "__main__":
     delAnalysisFolder()
     runSequence()
+
 
                         
 

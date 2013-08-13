@@ -3,6 +3,8 @@ This script reads the results of the runs and compiles the data
 into a csv file named sweepresults.csv. It also runs additional 
 analysis calculations and creates optional plots to reflect the
 results of the data.
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 import itertools as it
 import numpy as np

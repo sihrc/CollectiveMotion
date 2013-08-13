@@ -1,18 +1,15 @@
 """
 Tasks related to processing an image sequence to idenfity and track particles.
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 from subprocess import call
-import cv
-import cv2
+import cv, cv2, math, scaffold, utils, sys
 import numpy as np
-import math
 import tables as tb
 import images as im
-import scaffold
-import utils
 from scipy import stats
 from trackpy import tracking
-
 from matplotlib import pyplot as plt
 
 ELLIPSE_TABLE_PATH = "ellipses"
@@ -86,9 +83,9 @@ DILATION_RADIUS = scaffold.registerParameter("dilationRadius", 3)
 """Amount (in pixels) to dilate each image."""
 MORPH_THRESHOLD = scaffold.registerParameter("morphThreshold", 0.2)
 """Threshold for pixel values (0-1) after morphological procedures."""
-BLUR_SIGMA = scaffold.registerParameter("blurSigma", 2.0)
+BLUR_SIGMA = scaffold.registerParameter("blurSigma", 1.25)
 """The std. dev. (in pixels) for the gaussian blur."""
-EXP_THRESHOLD = scaffold.registerParameter("expThreshold", 0.0001)
+EXP_THRESHOLD = scaffold.registerParameter("expThreshold", 0.0005)
 """Threshold for pixel values after final dilation."""
 
 class FindParticlesViaMorph(ParticleFinder):
@@ -407,6 +404,111 @@ class RenderTable(tb.IsDescription):
     time     = tb.Float32Col(pos=5)
     trackID  = tb.Float32Col(pos=6)
     
+
+SIG2NOISE_METHOD = scaffold.registerParameter("sig2noise_method",'peak2peak')
+"""WiDIM Parameter for sig2noise_method"""
+SUBPIXEL_METHOD = scaffold.registerParameter("subpixel_method",'gaussian')
+"""WiDIM Parameter for subpixel_method"""
+TOLERANCE = scaffold.registerParameter("tolerance",0.0)
+"""WiDIM Parameter for tolerance"""
+VALIDATION_ITER = scaffold.registerParameter("validation_iter",1)
+"""WiDIM Parameter for validation_iter"""
+OVERLAP_RATIO = scaffold.registerParameter("overlap_ratio",0.5)
+"""WiDIM Parameter for overlap_ratio"""
+COARSE_FACTOR = scaffold.registerParameter("coarse_factor",2)
+"""WiDIM Parameter for coarse_factor"""
+
+class PIVTracking(scaffold.Task):
+    name = "Run PIV"
+    dependencies = [im.LoadImages]
+
+    def export(self):
+        return dict(pivtable=self.context.node("pivtable"),lenstr = self.lenstr)
+
+    def run(self):
+        self.frames = self._import(im.LoadImages, "images")
+        self.dt = self.context.attrs.dt
+        self._buildTable()
+  
+
+    def _buildTable(self):
+        table = self.context.createTable("pivdata", TracksTable, 
+                                         expectedrows=self.frames.nrows) # max
+        table.cols.time.createCSIndex()
+        track = table.row # shortcut
+
+        #self.iters = len(self.frames)
+        self.iters = self.context.attrs.iters  #Quick Debugging purposes
+
+        self.lenstr = str(len(str(self.iters-1)))
+        for i in range(self.iters - 1):
+            self.shutup()
+            data = self.runPIV(i)
+            self.talk()
+            for ellipse in data:
+                track['time']     = i*self.dt
+                track['position'] = ellipse[0:2]
+                try:
+                    track['angle'] = math.atan(ellipse[3]/ellipse[2])
+                except:
+                    track['angle'] = math.pi/2
+                track['axes']     = np.array([1,1])
+                track['velocity'] = ellipse[2:4]
+                track.append()
+            print "\nProgress:",(i+1)/float(self.iters-1)*100,"%\n"
+        # TODO: include more points in velocity
+        table.flush()
+        newTable = table.copy(newname="pivtable", sortby="time")
+        newTable.flush()  
+
+    class NullDevice():
+        def write(self, s):
+            pass
+    def shutup(self):
+        self.orig = sys.stdout
+        sys.stdout = self.NullDevice()
+    def talk(self):
+        sys.stdout = self.orig
+
+    def runPIV(self,i):
+        from pivtools import quivertools
+        import openpiv.process
+        import openpiv.scaling
+        from time import time
+        import warnings, os
+
+        scaling_factor = 50
+        frame_a = self.frames[i].astype(np.int32)
+        frame_b = self.frames[i+1].astype(np.int32)
+
+        density = self.context.attrs.folder
+        velocity = self.context.attrs.name[-3:]
+        density = density[density.rfind('\\'):]
+        currParams = scaffold._registeredParams["valueChange"].defaultValue
+
+        path = "..\\..\\PIVData\\" +density + "\\" + velocity + "\\" + "_".join(currParams).replace(".","") + "\\"
+        print "Writing Data Files to",path
+        
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        #main algorithm
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            x,y,u,v, mask=openpiv.process.WiDIM( frame_a, frame_b, np.ones(frame_a.shape, dtype=np.int32),subpixel_method = self._param(SUBPIXEL_METHOD), min_window_size=20, overlap_ratio=float(self._param(OVERLAP_RATIO)), coarse_factor = int(self._param(COARSE_FACTOR)), dt= self.dt, validation_method='mean_velocity', trust_1st_iter=0, validation_iter=int(self._param(VALIDATION_ITER)), tolerance=float(self._param(TOLERANCE)), nb_iter_max=3, sig2noise_method=self._param(SIG2NOISE_METHOD))
+            quivertools.save(x, y, u, v, mask, path + '\\PIVpreprocess' + str(i) +'.txt')
+
+        #display results
+        x, y, u, v = openpiv.scaling.uniform(x, y, u, v, scaling_factor = scaling_factor )
+        out = quivertools.save(x, y, u, v, mask,path + '\\PIVdata' + str(i) + '.txt')
+        fig = quivertools.display_vector_field(path + '\\PIVdata'+str(i) + '.txt',title = 't='+str((i+1)*self.dt),scale=scaling_factor, width=0.001)
+
+        fig.savefig('images\\' + 'image'+ ('{0:0'+str(len(str(self.iters)))+'}').format(i)+'.png')
+        #fig.savefig('images\\' + "_".join(currParams).replace(".","")+".png")
+        
+        return out
+
 TRACK_SEARCH_RADIUS = scaffold.registerParameter("trackSearchRadius", 0.75)
 """The maximum distance to look for the next particle in a track."""
 TRACK_MEMORY = scaffold.registerParameter("trackMemory", 0)
@@ -505,15 +607,13 @@ class TrackParticles(scaffold.Task):
         table = self.context.createTable("render_unsorted", RenderTable, 
                                          expectedrows=self._ellipses.nrows) # max
         table.cols.frame.createCSIndex()
-        track = table.row # shortcut
-        self.trackLength = []
+        track = table.row 
         trackID = 0
         flag = False
         for link in self._links:
             ellipses = [self._ellipses[p.row] for p in link.points]
             trackID += 1
             if len(ellipses) > self._param(TRACK_CUTOFF):
-                flag = True
                 print "Recording Track of Length:", len(ellipses)
                 for ellipse, nextEllipse in zip(ellipses, ellipses[1:]):
                     track['frame']    = ellipse['frame']
@@ -526,15 +626,7 @@ class TrackParticles(scaffold.Task):
                     track['velocity'] = dx/dt
                     track['trackID'] = trackID
                     track.append()
-            if len(link.points) != 1:
-                self.trackLength.append(len(link.points))
         # TODO: include more points in velocity
-        if not flag:
-            print "No Tracks Found"
-            dens = scaffold._registeredParam['configFile'].defaultValue
-            dens = dens[dens.find("Series")-7:dens.find("series")]
-            call(['python','notification.py',dens,'4'])
-            sys.exit()
         table.flush()
         newTable = table.copy(newname="tracksrender", sortby="frame")
         newTable.flush()

@@ -2,6 +2,9 @@
 This script grabs video files from a parent directory and copies 
 them all into a single directory that has all the videos by density 
 and velocity
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
+
 """
 import sys,os,shutil
 

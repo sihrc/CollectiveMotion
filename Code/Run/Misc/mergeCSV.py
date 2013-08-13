@@ -1,3 +1,9 @@
+"""
+Merges results from Sweep folders into a single directory
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
+"""
+
 import csv, os, sys, shutil, time
 import numpy as np
 

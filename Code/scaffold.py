@@ -1,4 +1,3 @@
-#!/usr/bin/env
 """
 Contains a set of helper methods/classes to make organization of tasks and
 parameters a little easier.

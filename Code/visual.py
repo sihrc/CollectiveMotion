@@ -1,9 +1,15 @@
+"""
+Contains tasks relating to rendering graphical visualizations of the data and results.
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
+"""
+
 from subprocess import call
 import scaffold, sys
 import particles as pt
 import images as im
 import analysis as an
-from pivtools import PIV
+import density_analysis as an_dens
 import numpy as np
 import gc, csv, math, cv2, os, colorsys
 from matplotlib import pyplot as plt
@@ -44,48 +50,19 @@ class _RenderTask(scaffold.Task):
 PLOT_PIV_FIELD_OUTPUT = scaffold.registerParameter("plotPIVFieldOutput","../plots/{0}-PIVField.avi")
 """The file path to render the toutput animation of PlotPIVField to."""
 
-class PlotPIVField(_RenderTask):
+class PlotPIVField(scaffold.Task):
     name = "Plot PIV Field"
-    dependencies = [im.LoadImages]#[im.ComputeForegroundMasks]
+    dependencies = [pt.PIVTracking]
     _outputParam = PLOT_PIV_FIELD_OUTPUT
 
-    class NullDevice():
-        def write(self, s):
-            pass
-    def shutup(self):
-        self.orig = sys.stdout
-        sys.stdout = self.NullDevice()
-
-    def talk(self):
-        sys.stdout = self.orig
-
     def run(self):
-        from pivtools import PIV
-        self.output = _formatOutput(self, self._outputParam)
-        frames = self._import(im.LoadImages, "images")
-        images = []
-        for i in range(len(frames)-1):
-            self.shutup()
-            fig = PIV.runPIV(frames[i].astype(np.int32),frames[i+1].astype(np.int32),dt = self.context.attrs.dt)
-            agg = fig.canvas.switch_backends(FigureCanvasAgg)
-            agg.draw()
-            self.shape_ = agg.get_width_height()
-            self.talk()
-            fig.savefig('images\\' + 'image'+ ('{0:0'+str(len(str(len(frames))))+'}').format(i)+'.png')
-            print "\nProgress:",i/float(len(frames)-1)*100,"%\n"
-            self.lenstr = str(len(str(i)))
-        self._simpleRender(".\\images")
-
-    def _simpleRender(self,path):
-        from subprocess import call
         import shutil
-        cmd = "ffmpeg -f image2 -r 20 -i .\\images\\image%0" + self.lenstr + "d.png -c:v libx264 -r 20 .\\images\\output.mp4"
+        lenstr = self._import(pt.PIVTracking,"lenstr")
+        output = _formatOutput(self,self._outputParam)
+        cmd = "ffmpeg -f image2 -r 20 -i .\\images\\image%0" + lenstr + "d.png -c:v libx264 -r 20 .\\images\\output.mp4"
         os.system(cmd)
-        shutil.copy(".\\images\\output.mp4",self.output)
+        shutil.copy(".\\images\\output.mp4",output)
         [os.remove(os.path.join('.\\images',filename)) for filename in os.listdir(".\\images")]
-
-
-
 
 
 RENDER_MASKS_OUTPUT = scaffold.registerParameter("renderMasksOutput", "../videos/{0}-masks.avi")
@@ -339,12 +316,12 @@ class _PlotField(_AnimationTask):
 
         def doPlot(row, axes):
             axes.set_title("t = {0}".format(row['time']))
-
             if self._fieldType == 'scalar':
                 shape = self._param(an.NUM_GRID_CELLS)
                 axes.pcolormesh(points[:, 0].reshape(shape), 
                                 points[:, 1].reshape(shape), 
                                 row['data'].reshape(shape))
+                                
             elif self._fieldType == 'vector':
                 axes.quiver(points[:, 0], points[:, 1], 
                             row['data'][:, 0], row['data'][:, 1])
@@ -369,14 +346,33 @@ class PlotVelocityField(_PlotField):
 PLOT_DENSITY_FIELD_OUTPUT = scaffold.registerParameter("plotDensityFieldOutput", "../plots/{0}-densityField.avi")
 """The file path to render the output animation of PlotDensityField to."""
 
-class PlotDensityField(_PlotField):
-
+class PlotDensityField(_AnimationTask):
     name = "Plot Densities"
-    dependencies = _PlotField.dependencies + [an.CalculateDensityField]
+    dependencies = [an_dens.GridParticles, an_dens.CalculateDensityField]
     _outputParam = PLOT_DENSITY_FIELD_OUTPUT
     _fieldType = "scalar"
 
-    def _getTable(self): return self._import(an.CalculateDensityField, "field")
+
+    def run(self):
+        points = self._import(an_dens.GridParticles, "cellCenters")
+
+        def doPlot(row, axes):
+            axes.set_title("t = {0}".format(row['time']))
+            if self._fieldType == 'scalar':
+                shape = self._param(an.NUM_GRID_CELLS)
+                axes.pcolormesh(points[:, 0].reshape(shape), 
+                                points[:, 1].reshape(shape), 
+                                row['data'].reshape(shape))
+            elif self._fieldType == 'vector':
+                axes.quiver(points[:, 0], points[:, 1], 
+                            row['data'][:, 0], row['data'][:, 1])
+            else:
+                raise NotImplemented
+            
+        self._animate(self._getTable(), doPlot)
+   
+
+    def _getTable(self): return self._import(an_dens.CalculateDensityField, "field")
 
 
 class _PlotCorrelation(scaffold.Task):

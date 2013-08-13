@@ -30,7 +30,7 @@ import matplotlib.pyplot as pl
 
 
 
-def display_vector_field( filename,**kw):
+def display_vector_field( filename,title,**kw):
     """ Displays quiver plot of the data stored in the file 
     
     
@@ -65,6 +65,7 @@ def display_vector_field( filename,**kw):
     valid = ~invalid
     pl.quiver(a[invalid,0],a[invalid,1],a[invalid,2],a[invalid,3],color='r',**kw)
     pl.quiver(a[valid,0],a[valid,1],a[valid,2],a[valid,3],color='b',**kw)
+    pl.title(title)
     return pl.gcf()
 
 def imread( filename, flatten=True ):
@@ -139,10 +140,23 @@ def save( x, y, u, v, mask, filename, fmt='%8.4f', delimiter='\t' ):
     """
     # build output array
     out = np.vstack( [m.ravel() for m in [x, y, u, v, mask] ] )
-            
-    # save data to file.
-    np.savetxt( filename, out.T, fmt=fmt, delimiter=delimiter )
+    out = out.T
 
+    filters = []
+    
+    mean = (out[:,2:4]).mean(axis=0)
+    filters.append((out[:,4] == 0))
+    filters.append((np.sum(out[:,2:4]**2) > (mean**2)*2))
+    for _filter in filters:
+        for row in range(1,len(_filter)-1):
+            if _filter[row].any():
+                #out[row][2:4] = (np.sum(out[row-3:row-1][2:4]) + np.sum(out[row+1:row+3][2:4]))/4
+                out[row,2:4] = (out[row-1,2:4] + out[row+1,2:4])/2
+                out[row,4] = 1
+    
+    # save data to file.
+    np.savetxt( filename, out, fmt=fmt, delimiter=delimiter )
+    return out
 def display( message ):
     """Display a message to standard output.
     

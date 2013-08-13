@@ -1,36 +1,37 @@
 --------
  README
 --------
-Last Updated: 8/12/2013
+Last Updated: 8/13/2013
 
 --------
 Summary
 --------
-The package executes particle detection and tracking along with several analysis algorithms
-to better interpret the results. Contained in this package are a set of python script files
-that contain the actual algorithms and a set of script files that run these algorithms. 
-These are listed in "Contents". 
+This package performs particle detection and tracking on provided images from the confocal.
+It also contains some analysis code to interpret results. Contained in this package are a 
+set of python script files that contain the actual algorithms and a set of script files 
+that run these algorithms. This structure is listed under "Contents" of this document. 
 
 Getting started - 
 	The first step of using this package is to fully understand the structure
 	of the code. There are several classes implemented in this package. There are "scaffolding" 
 	classes inside scaffold.py that hold the general structure for all the "tasks" (image proc-
-	essing/detection/tracking/analysis/etc). Knowing this, there shouldn't be much to edit under
-	scaffold.py; it would be best to just leave this file alone. 
+	essing/detection/tracking/analysis/etc) and how each of them run/depend on one another. These
+	are like the templates for any new classes in the future. Knowing this, there shouldn't be much
+	to edit under scaffold.py itself; it would be best to just leave this file alone. 
 	
-	The actual algorithms are held in particles.p with particle detection followed by particle
-	tracking. You will notice now that base "tasks" inherit scaffold.task ( which is the structure
-	for tasks that the scaffold will recognize and run. If you wish to create a new task, it is best
-	to follow the guidelines for scaffold.task - include dependencies = [], run(), export(), isComplete()).
-	You will also notice that classes inherit each others, and not just scaffold.Task. Generally,
+	The actual algorithms are held in particles.py with particle detection followed by particle
+	tracking. Notice now that base "tasks" inherit scaffold.task ( which is the structure
+	for tasks that the scaffold will recognize and run. To create a new task, it is best
+	to follow the guidelines for scaffold.task - include dependencies = [], run(), export(),
+	isComplete()). Notice that classes also inherit each other, not just scaffold.Task. Generally,
 	if a class inherits another class, running those classes will automatically run the classes that
-	are inherited/included in dependencies. As a result, there are several "final result" tasks that
-	are also listed in singleRun.py. These tasks are the ones that are run; the scaffold will take care
-	of any dependencies they require.
+	are inherited/included in dependencies (defined with each task). As a result, there are several 
+	"final result" tasks that are listed in singleRun.py. These tasks are the ones that are explicitly
+	run; the scaffold will take care of running any dependent tasks they require.
 	
-	With general knowledge of python classes, it shouldn't be too hard to be able to add/modify the
-	existing code. There are methods of saving variables globally, accessing functions globally, and
-	sharing results globally. These are all listed under scaffold.py. 
+	With general knowledge of python classes, it shouldn't be too hard to add/modify the existing code. 
+	There are methods of saving variables globally, accessing functions globally, and sharing results 
+	globally. These are all detailed and blueprinted under scaffold.py. 
 
 ----------
  CONTENTS
@@ -161,7 +162,7 @@ SUMMARY:
 	are structured, but other than manually locating the data and editing the path, the rest
 	of the directories should be automatically created.
 
-	Some common issues will be located in a later section.
+	Some common issues are located in "COMMON ISSUES" section.
 
 BASIC USE:
 	To add or remove tasks, simply find the list of tasks that are mostly commented out
@@ -199,11 +200,19 @@ COMMON ISSUES:
 		because the units of the table that is imported is not in microns. To fix this, multiply data
 		in pixels by self.context.attrs.pixel (the conversion factor between pixels and microns as set
 		by the config file provided by the raw images - .xml file). 
+	Installing Dependencies
+		A common issue with running the code for the first time is incorrectly installed dependencies.
+		There is a README within the dependencies folder that detail the steps that should be taken.
+		Because of "out-of-date" configuration settings of OpenPIV, it is recommended to setup OpenPIV
+		first, install PythonXY to appease OpenPIV, and then reinstall any other dependencies in the folder
+		as the program errors call for them.
 
 If there are issues not mentioned here, contact:
 [1]christopher.lee@students.olin.edu/sihrc.c.lee@gmail.com
 [2]chase.kernan@gmail.com
 
+
+External Tracking Modules - provided Documentation:
 --------------
 ABOUT OpenPIV
 --------------

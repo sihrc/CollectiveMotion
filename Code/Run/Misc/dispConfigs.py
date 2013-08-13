@@ -1,4 +1,8 @@
-""" Prints all the current configs and parameters for the context """
+""" 
+Prints all the current configs and parameters for the context 
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
+
+"""
 import sys, tables
 sys.path.insert(0,'../')
 import images, particles, visual, scaffold, analysis

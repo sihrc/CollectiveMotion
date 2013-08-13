@@ -1,4 +1,8 @@
-""" Uses SMTP to send commands to the listening address on alternate computers """
+"""
+Uses SMTP to send commands to the listening address on alternate computers
+
+:Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
+"""
 import smtplib  
 import os, sys
 import numpy as np
@@ -6,12 +10,12 @@ import numpy as np
 comps = sys.argv[1][1:-1].split(",")
 sweep = sys.argv[2]
 
-fromaddr = 'christopher.lee.olin@gmail.com'  
-toaddrs  = 'c.sihrc.lee@gmail.com' 
+fromaddr = ''  
+toaddrs  = '' 
 
 # Credentials (if needed)  
-username = 'christopher.lee.olin'  
-password = 'Cl120193'  
+username = ''  
+password = ''  
   
 # The actual mail send  
 server = smtplib.SMTP('smtp.gmail.com:587')  
