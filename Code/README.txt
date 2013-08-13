@@ -33,6 +33,29 @@ Getting started -
 	There are methods of saving variables globally, accessing functions globally, and sharing results 
 	globally. These are all detailed and blueprinted under scaffold.py. 
 
+Quick RoadMap - 
+	Here's a quick roadmap to running the package once:
+		I. python runSweep.py [density-data-folder-name][destination-sweep-folder-name]
+			Here you can determine what you want to run. 
+			Set parameters you want to run under setParams()
+			Only need run runSweep.py to call everything else.
+			
+		II. singleRun.py
+			Here is where you decide what tasks you want run. Under runSeq()
+			
+		III. Tasks
+			From here on, the scaffold context scheduler looks at what you set
+			under runSeq() and looks for those tasks in the respective scripts.
+			[particles.py, analysis.py, density_analysis.py, visual.py, images.py]
+			
+		IV.  Subsequent Tasks
+			The scaffold context scheduler looks at the dependencies of these tasks - 
+			which are more tasks and runs those as well. For tasks that inherit other
+			tasks, the greatest parent class that inherits scaffold.Task is whats run.
+			
+			After everything is done running,the program exits. You might have some results 
+			depending on what tasks you ran (normally under analysis.py/density_analysis.py
+			or viewData in SingleRun.py).
 ----------
  CONTENTS
 ----------
