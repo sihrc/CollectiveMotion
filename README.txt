@@ -16,7 +16,7 @@ Getting started -
     The first step of using this package is to fully understand the structure
     of the code. There are several classes implemented in this package. There
     are "scaffolding" classes inside scaffold.py that hold the general structure
-    for all the "tasks" (image proc- essing/detection/tracking/analysis/etc) and
+    for all the "tasks" (image processing/detection/tracking/analysis/etc) and
     how each of them run/depend on one another. These are like the templates for
     any new classes in the future. Knowing this, there shouldn't be much to edit
     under scaffold.py itself; it would be best to just leave this file alone.
