@@ -66,7 +66,7 @@ Quick RoadMap -
             some results depending on what tasks you ran (normally under
             analysis.py/density_analysis.py or viewData in SingleRun.py).
 ----------
-    CONTENTS
+CONTENTS
 ----------
     > ./Dependencies
         Contains all the dependencies needed to run these scripts as windows
@@ -75,74 +75,80 @@ Quick RoadMap -
         Contains data with structure ./Data/Density/Series###_##_##.xml with
         .tifs
     > ./Code
-        >./Code/Run
+	>./Code/Run
             >analyzeSweep.py
                 Run to access data results. Compiles all analysis.csv files into
                 sweepresults.csv. From sweepresults.csv, specific sweep results
                 can be accessed by inputting line number of their locations in
                 sweepresults.csv
             >automatedRun.py
-                Called by remoteCommand.py. Calls notification.py,
-                synchronize.py, and runSweep.py
+               	Called by remoteCommand.py. Calls notification.py,
+               	synchronize.py, and runSweep.py
             >notification.py
-                Send email notifications to specified email address. Email
-                account must allow SMTP (Gmail).Messages can be added/modified
-                based on single message list within the script.
-            >remoteCommand.py
-                Run by remote computers. Waits and listens for specific command
-                before launching automatedRun.py
+               	Send email notifications to specified email address. Email
+               	account must allow SMTP (Gmail).Messages can be added/modified
+               	based on single message list within the script.
+	    >remoteCommand.py
+               	Run by remote computers. Waits and listens for specific command
+               	before launching automatedRun.py
             >runSweep.py
-                Runs singleRun.py. Run by onsite computer. Controls sweep
-                configurations. i.e. what values/what parameters/what data
+               	Runs singleRun.py. Run by onsite computer. Controls sweep
+               	configurations. i.e. what values/what parameters/what data
             >sendCommands.py
-                Sends messages in parsable syntax accepted by remoteCommand.py
+               	Sends messages in parsable syntax accepted by remoteCommand.py
             >singleRun.py
-                Contains the context/scheduler of the entire package. Controls
-                what scaffold.Tasks are run. Talks to runSweep.py for parameter
-                changes. List of tasks available - uncomment to include in
-                scheduler.
+               	Contains the context/scheduler of the entire package. Controls
+               	what scaffold.Tasks are run. Talks to runSweep.py for parameter
+               	changes. List of tasks available - uncomment to include in
+               	scheduler.
             >synchronize.py
-                Synchronizes parent directory of Code (./Code) to another
-                directory, making an exact copy. Capable of overwritting or
-                choosing not to copy based on arguments and use of methods
-                (filecmp,cmphashes)
+               	Synchronizes parent directory of Code (./Code) to another
+               	directory, making an exact copy. Capable of overwritting or
+               	choosing not to copy based on arguments and use of methods
+               	(filecmp,cmphashes)
         >./Code/Run/Misc
             >dispConfigs.py
-                Displays the configurations set by config file (.xml) of the
-                data.
+            	Displays the configurations set by config file (.xml) of the
+               	 data.
             >mergeCSV.py
-                Merges sweep results across several sweep folders into a sweep
-                folder with all the analysis.csv and .avi files. Prepares for
-                analyzeSweep.py in the event of several sweep folders
+            	Merges sweep results across several sweep folders into a sweep
+              	folder with all the analysis.csv and .avi files. Prepares for
+               	analyzeSweep.py in the event of several sweep folders
             >synchroVideos.py
-                Saves all videos and names them after density and velocity of
-                the data in specified directory. (Does not render them).
+               	Saves all videos and names them after density and velocity of
+               	the data in specified directory. (Does not render them).
         >./Code/Run/trackpy
-            Contains tracking algorithm currently implemented. This is currently
-            not working optimally. The alternative, OpenPIV, is used.
+            	Contains tracking algorithm currently implemented. This is currently
+            	not working optimally. The alternative, OpenPIV, is used.
+	>./Code/Run/TIF_stack_reading
+		>tifffile.py
+			TIF File reader by Christopher Gohlke. Used in TIFStackReader.py
+		>TIFStackReader.py
+			Reads specified image stack by pages. Cannot load all at once
+			due to memory error.
         >./Code/pivtools
-            Contains the OpenPIV implementation. The open-piv package must be
-            installed. These are only the files that were edited from the
-            original to work with our code.
+            	Contains the OpenPIV implementation. The open-piv package must be
+            	installed. These are only the files that were edited from the
+            	original to work with our code.
         >analysis.py
-            Contains the analysis tasks to be run in the context.
-            Provides most of the results. New tasks can be implemented,
-            following similar structure under class scaffold.Task
+            	Contains the analysis tasks to be run in the context.
+            	Provides most of the results. New tasks can be implemented,
+            	following similar structure under class scaffold.Task
         >images.py
-            Contains all scaffold.Tasks that deal with the data images.
+            	Contains all scaffold.Tasks that deal with the data images.
         >particles.py
-            Contains all detection and tracking scaffold.Tasks (core package)
+            	Contains all detection and tracking scaffold.Tasks (core package)
         >scaffold.py
-            Contains the scaffold class. Handles the running of all the
-            scaffold.Tasks
+            	Contains the scaffold class. Handles the running of all the
+            	scaffold.Tasks
         >storage.py
-            Contains methods for hashTable storage.
+            	Contains methods for hashTable storage.
         >utils.py
-            Contains utility methods
+            	Contains utility methods
         >visual.py
-            Contains all scaffold.Tasks that deal renders (videos/plots)
+            	Contains all scaffold.Tasks that deal renders (videos/plots)
 ----------------
-    PROJECT STATUS
+PROJECT STATUS
 ----------------
 
 PARAMETER SWEEPING:
@@ -203,7 +209,7 @@ ANALYSIS:
 
 
 ------------
-    HOW TO USE
+ HOW TO USE
 ------------
 
 SUMMARY:
