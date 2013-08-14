@@ -10,6 +10,9 @@ from subprocess import call
 from email import parser
 
 def checkEmail():
+	""" 
+	Checks email for command
+	"""
 	pop_conn = poplib.POP3_SSL('pop.gmail.com')
 	pop_conn.user('')
 	pop_conn.pass_('')

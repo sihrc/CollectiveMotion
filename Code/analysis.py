@@ -1,5 +1,5 @@
 """
-Tasks related to analyzing particle tracks.
+Tasks related to analyzing particle tracks
 
 :Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
@@ -84,7 +84,7 @@ class GridParticles(scaffold.Task):
 
 
 class CalculateByTime(scaffold.Task):
-
+    """ Base tasks for time dependent analyses """
     dependencies = [particles.PIVTracking]
     _tablePath = None
 
@@ -124,7 +124,7 @@ class CalculateByTime(scaffold.Task):
 
 
 class GriddedField(CalculateByTime):
-
+    """ Base task for gridded field dependent analyses """
     dependencies = CalculateByTime.dependencies + [GridParticles]
 
     def export(self):
@@ -170,7 +170,7 @@ def _index(i):
 
 
 class NormalizeVelocities(scaffold.Task):
-
+    """ Normalizes velocities """
     name = "Normalize Velocities"
     dependencies = [particles.PIVTracking]
 
@@ -278,7 +278,7 @@ RADII = scaffold.registerParameter("radii", np.arange(.5,6,.5))
 """The successive radii to calculate correlations at."""
 
 class ComputeCircleAreas(scaffold.Task):
-
+    """ Computes Circle areas for things like density calculations """
     name = "Compute Circle Areas"
     dependencies = [images.ParseConfig]
 

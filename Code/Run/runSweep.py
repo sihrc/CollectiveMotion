@@ -1,6 +1,7 @@
 """
 This script calls singleRun.py which runs the application. This script handles the changing parameters and is called by automateRun.py
-
+Usage:
+python runSweep.py [data folder - Density][sweep name]
 :Edited: August 13, 2013 - contact(sihrc.c.lee@gmail.com)
 """
 

@@ -419,6 +419,11 @@ COARSE_FACTOR = scaffold.registerParameter("coarse_factor",2)
 """WiDIM Parameter for coarse_factor"""
 
 class PIVTracking(scaffold.Task):
+    """ 
+    Tracks particles uses the OpenPIV Python module 
+    Saves velocity field data in a table similar to a
+    tracks table.
+    """
     name = "Run PIV"
     dependencies = [im.LoadImages]
 
@@ -462,28 +467,34 @@ class PIVTracking(scaffold.Task):
         newTable.flush()  
 
     class NullDevice():
+        """ Captures STDOUT and passes it nothing """
         def write(self, s):
             pass
     def shutup(self):
+        """ Shuts the standard output """
         self.orig = sys.stdout
         sys.stdout = self.NullDevice()
     def talk(self):
+        """ Releases the standard output """
         sys.stdout = self.orig
 
     def runPIV(self,i):
+        """
+        Running the actual PIV. Imports necessary modules
+        """
         from pivtools import quivertools
         import openpiv.process
         import openpiv.scaling
         from time import time
         import warnings, os
 
-        scaling_factor = 50
-        frame_a = self.frames[i].astype(np.int32)
-        frame_b = self.frames[i+1].astype(np.int32)
+        scaling_factor = 50 #Unit conversion from pixels to desired unit.
+        frame_a = self.frames[i].astype(np.int32) #Image 1 of 2
+        frame_b = self.frames[i+1].astype(np.int32) #Image 2 of 2
 
-        density = self.context.attrs.folder
-        velocity = self.context.attrs.name[-3:]
-        density = density[density.rfind('\\'):]
+        density = self.context.attrs.folder #File Naming purposes
+        velocity = self.context.attrs.name[-3:] #File Naming purposes
+        density = density[density.rfind('\\'):] 
         currParams = scaffold._registeredParams["valueChange"].defaultValue
 
         path = "..\\..\\PIVData\\" +density + "\\" + velocity + "\\" + "_".join(currParams).replace(".","") + "\\"
